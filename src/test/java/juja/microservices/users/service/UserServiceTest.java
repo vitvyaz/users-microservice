@@ -1,7 +1,6 @@
 package juja.microservices.users.service;
 
 import juja.microservices.users.dao.UserRepository;
-import juja.microservices.users.dao.UserRepositoryTest;
 import juja.microservices.users.entity.User;
 import juja.microservices.users.entity.UserSearchRequest;
 import org.junit.Test;
@@ -41,7 +40,7 @@ public class UserServiceTest {
         List<User> expectedList = new ArrayList<>();
         expectedList.add(mock(User.class));
         when(repository.getAllUsers()).thenReturn(expectedList);
-        List<User> actualList = service.getAllUsers(0,20);
+        List<User> actualList = service.getUsers(0,20);
         assertEquals(expectedList, actualList);
     }
 

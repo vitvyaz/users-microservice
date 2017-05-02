@@ -1,6 +1,5 @@
 package juja.microservices.users.controller;
 
-
 import juja.microservices.users.entity.User;
 import juja.microservices.users.entity.UserSearchRequest;
 import juja.microservices.users.service.UserService;
@@ -11,14 +10,13 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.inject.Inject;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @Validated
 public class UserController {
+
+    private static final String DEFAULT_PAGE_SIZE = "20";
 
     private final UserService userService;
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -28,11 +26,19 @@ public class UserController {
         this.userService = userService;
     }
 
-    @RequestMapping(value = "/users", params = {"_page", "_limit"}, method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/users", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    public ResponseEntity<?> getAllUsers(@RequestParam("_page") int limit, @RequestParam("_limit") int page) {
-        List<User> users = userService.getAllUsers(page, limit);
-        logger.info("Successfully completed GET all users");
+    public ResponseEntity<?> getUsers(@RequestParam(defaultValue = DEFAULT_PAGE_SIZE) int pageSize,
+                                      @RequestParam(required=false) Integer page) {
+        List<User> users;
+        if(page != null) {
+            users = userService.getUsers(page, pageSize);
+            logger.info(String.format("Successfully got users with parameters: page = %s, pageSize = %s", page, pageSize));
+        } else {
+            users = userService.getAllUsers();
+            logger.info("Successfully got all users");
+        }
+
         return ResponseEntity.ok(users);
     }
 

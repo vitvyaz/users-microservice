@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
 import java.util.HashMap;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -27,13 +26,24 @@ public class UserService {
         this.repository = userRepository;
     }
 
-    public List<User> getAllUsers(int page, int limit) {
+    public List<User> getUsers(int page, int pageSize) {
+        List<User> users = getAllUsers(); //TODO users must be ordered by some field
+
+        int start = page * pageSize;
+        if (start >= users.size()) {
+            throw new UserException("Can't build page. Wrong parameters 'page' and 'pageSize' !");
+        }
+        int end = Math.min(start + pageSize, users.size());
+
+        return users.subList(page, end);
+    }
+
+    public List<User> getAllUsers() {
         List<User> users = repository.getAllUsers();
-        if (page + limit > users.size()) return users;
         if (users.size() == 0) {
             throw new UserException("Seems like no users in list yet!");
         }
-        return users.subList(page, page + limit);
+        return users;
     }
 
 
