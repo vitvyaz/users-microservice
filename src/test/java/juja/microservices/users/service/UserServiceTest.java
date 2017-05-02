@@ -19,11 +19,9 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.mock;
 
-
 /**
  * @author Denis Tantsev (dtantsev@gmail.com)
  */
-
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(UserService.class)
@@ -36,11 +34,20 @@ public class UserServiceTest {
     private UserRepository repository;
 
     @Test
-    public void getUserAllUsersTest() throws Exception {
+    public void getAllUsersTest() throws Exception {
         List<User> expectedList = new ArrayList<>();
         expectedList.add(mock(User.class));
         when(repository.getAllUsers()).thenReturn(expectedList);
-        List<User> actualList = service.getUsers(0,20);
+        List<User> actualList = service.getAllUsers();
+        assertEquals(expectedList, actualList);
+    }
+
+    @Test
+    public void getUsersTestPage0PageSize20() throws Exception {
+        List<User> expectedList = new ArrayList<>();
+        expectedList.add(mock(User.class));
+        when(repository.getUsers(0, 20)).thenReturn(expectedList);
+        List<User> actualList = service.getUsers(0, 20);
         assertEquals(expectedList, actualList);
     }
 

@@ -27,31 +27,20 @@ public class UserService {
     }
 
     public List<User> getUsers(int page, int pageSize) {
-        List<User> users = getAllUsers(); //TODO users must be ordered by some field
-
-        int start = page * pageSize;
-        if (start >= users.size()) {
-            throw new UserException("Can't build page. Wrong parameters 'page' and 'pageSize' !");
-        }
-        int end = Math.min(start + pageSize, users.size());
-
-        return users.subList(page, end);
+        List<User> users = repository.getUsers(page, pageSize);
+        validationUsers(users, "Seems like no users in list yet!");
+        return users;
     }
 
     public List<User> getAllUsers() {
         List<User> users = repository.getAllUsers();
-        if (users.size() == 0) {
-            throw new UserException("Seems like no users in list yet!");
-        }
+        validationUsers(users, "Seems like no users in list yet!");
         return users;
     }
 
-
     public List<User> searchUser(UserSearchRequest request) {
         List<User> users = repository.getUsersByParameters(request.toMap());
-        if (users.size() == 0) {
-            throw new UserException("No users found by your request!");
-        }
+        validationUsers(users, "No users found by your request!");
         return users;
     }
 
@@ -59,10 +48,13 @@ public class UserService {
         Map<String, String> parameters = new HashMap<>();
         parameters.put("uuid", uuid);
         List<User> users = repository.getUsersByParameters(parameters);
-        if (users.size() == 0) {
-            throw new UserException("No users found by your request!");
-        }
+        validationUsers(users, "No users found by your request!");
         return users.get(0);
     }
 
+    private void validationUsers(List<User> users, String message) {
+        if (users.size() == 0) {
+            throw new UserException(message);
+        }
+    }
 }

@@ -1,7 +1,6 @@
 package juja.microservices.users.dao;
 
 import juja.microservices.users.entity.User;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Map;
@@ -12,5 +11,6 @@ import java.util.Map;
  */
 public interface UserRepository {
     List<User> getAllUsers();
+    List<User> getUsers(int page, int pageSize);
     List<User> getUsersByParameters(Map<String, String> fields);
 }

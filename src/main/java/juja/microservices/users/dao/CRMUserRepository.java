@@ -1,7 +1,5 @@
 package juja.microservices.users.dao;
 
-
-
 import juja.microservices.users.entity.User;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
@@ -19,12 +17,11 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
-
 /**
  * @author Denis Tantsev (dtantsev@gmail.com)
  */
 @Repository
-public class CRMUserRepository implements UserRepository{
+public class CRMUserRepository implements UserRepository {
 
     private final String x2_user = "apiuser";
     private final String x2_apikey = "password";
@@ -33,28 +30,28 @@ public class CRMUserRepository implements UserRepository{
     private final RestTemplate restTemplate;
 
     @Inject
-    public CRMUserRepository(RestTemplate restTemplate){
+    public CRMUserRepository(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 
-    private HttpHeaders createHeaders(final String username, final String password ){
-        HttpHeaders headers =  new HttpHeaders(){
+    private HttpHeaders createHeaders(final String username, final String password) {
+        HttpHeaders headers = new HttpHeaders() {
             {
                 String auth = username + ":" + password;
                 byte[] encodedAuth = Base64.getEncoder().encode(
-                        auth.getBytes(Charset.forName("US-ASCII")) );
-                String authHeader = "Basic " + new String( encodedAuth );
-                set( "Authorization", authHeader );
+                        auth.getBytes(Charset.forName("US-ASCII")));
+                String authHeader = "Basic " + new String(encodedAuth);
+                set("Authorization", authHeader);
             }
         };
         return headers;
     }
 
     @Override
-    public List<User> getAllUsers(){
-        URI targetUrl= UriComponentsBuilder.fromUriString(X2_BASE_URL)
+    public List<User> getAllUsers() {
+        URI targetUrl = UriComponentsBuilder.fromUriString(X2_BASE_URL)
                 .path("Contacts")
-                .queryParam("c_isStudent","1")
+                .queryParam("c_isStudent", "1")
                 .build()
                 .toUri();
 
@@ -69,11 +66,31 @@ public class CRMUserRepository implements UserRepository{
     }
 
     @Override
+    public List<User> getUsers(int page, int pageSize) {
+        URI targetUrl = UriComponentsBuilder.fromUriString(X2_BASE_URL)
+                .path("Contacts")
+                .queryParam("c_isStudent", "1")
+                .queryParam("_order", "+c_slack")
+                .queryParam("_page", Integer.toString(page))
+                .queryParam("_limit", Integer.toString(pageSize))
+                .build()
+                .toUri();
+
+        ResponseEntity<List<User>> response;
+        response = restTemplate.exchange(
+                targetUrl, HttpMethod.GET, new HttpEntity<Object>(createHeaders(x2_user, x2_apikey)), new ParameterizedTypeReference<List<User>>() {
+                });
+
+        List<User> users = response.getBody();
+        return users;
+    }
+
+    @Override
     public List<User> getUsersByParameters(Map<String, String> fields) {
 
-        UriComponentsBuilder uriComponentsBuilder= UriComponentsBuilder.fromUriString(X2_BASE_URL)
+        UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromUriString(X2_BASE_URL)
                 .path("Contacts")
-                .queryParam("c_isStudent","1");
+                .queryParam("c_isStudent", "1");
 
         for (Map.Entry<String, String> entry : fields.entrySet()) {
             if (entry.getKey().equals("uuid") && !entry.getValue().isEmpty())
@@ -83,7 +100,7 @@ public class CRMUserRepository implements UserRepository{
             if (entry.getKey().equals("email") && !entry.getValue().isEmpty())
                 uriComponentsBuilder.queryParam("email", entry.getValue());
         }
-        URI targetUrl= uriComponentsBuilder
+        URI targetUrl = uriComponentsBuilder
                 .build()
                 .toUri();
 
@@ -92,7 +109,7 @@ public class CRMUserRepository implements UserRepository{
                 targetUrl, HttpMethod.GET, new HttpEntity<Object>(createHeaders(x2_user, x2_apikey)), new ParameterizedTypeReference<List<User>>() {
                 });
 
-        ArrayList<User> users = (ArrayList)response.getBody();
+        ArrayList<User> users = (ArrayList) response.getBody();
         return users;
     }
 }
