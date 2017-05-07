@@ -71,6 +71,20 @@ public class UserControllerTest {
     }
 
     @Test
+    public void getAllUsersFilterFields() throws Exception {
+        List<User> users = new ArrayList<>();
+        users.add(new User("AAAA123", "Vasya", "Ivanoff", "vasya@mail.ru", "vasya@gmail.com", "vasya", "vasya.ivanoff",
+                "linkedin/vasya", "facebook/vasya", "twitter/vasya"));
+        when(service.getAllUsers()).thenReturn(users);
+        String result = mockMvc.perform(get("/users?fields=uuid,firstName,lastName")
+                .contentType(APPLICATION_JSON_UTF8))
+                .andExpect(content().contentType(APPLICATION_JSON_UTF8))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        assertThatJson(result).isEqualTo(USER_VASYA);
+    }
+
+    @Test
     public void getAllUsersWithoutPageAndPageSize() throws Exception {
         List<User> users = new ArrayList<>();
         users.add(new User("AAAA123", "Vasya", "Ivanoff", "vasya@mail.ru", "vasya@gmail.com", "vasya", "vasya.ivanoff",
